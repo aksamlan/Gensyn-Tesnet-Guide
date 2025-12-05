@@ -1,116 +1,121 @@
-# 🧠 Gensyn Testnet Node Guide
+Gensyn Testnet Node Guide
 
-Bu rehber, **Gensyn Testnet Node** kurulumunu GPU, VPS veya WSL ortamlarında kolayca gerçekleştirebilmeniz için hazırlanmıştır. Adımlar sadeleştirilmiş, hatalardan arındırılmış ve repo uyumlu hale getirilmiştir.
-
----
-
-## 🚀 Sistem Gereksinimleri
-
-| Bileşen         | Gereksinim                           |
-| --------------- | ------------------------------------ |
-| CPU Mimarisi    | `arm64` veya `amd64`                 |
-| RAM             | Önerilen: **24 GB+**                 |
-| GPU (Opsiyonel) | RTX 3090 / 4070 / 4090 / A100 / H100 |
-| Python          | **>= 3.10**                          |
-
-> 💡 GPU zorunlu değildir, ancak yüksek başarı oranı için önerilir.
+This guide provides an easy and clean installation process for running a **Gensyn Testnet Node** on GPU servers, VPS environments, or WSL. All steps are simplified, error-free, and fully compatible with the official repository.
 
 ---
 
-## ⚙️ GPU Kiralama (Quick Pod Örneği)
+## 🚀 System Requirements
 
-1. [Quick Pod](https://quickpod.io/) sitesine gidin ve e-posta ile kayıt olun.
-2. E-postanızı doğrulayın.
-3. Hesabınıza bakiye ekleyin (kredi kartı veya kripto ile).
-4. Template olarak **Ubuntu 22.04 (Jammy)** seçin.
-5. `Select GPU` kısmında örneğin `RTX 4090` seçin.
-6. `Create POD` butonuna tıklayın.
-7. Sunucu hazır olduğunda **Connect → Web Terminal** üzerinden bağlanabilirsiniz.
+| Component        | Requirement                          |
+| ---------------- | ------------------------------------ |
+| CPU Architecture | `arm64` or `amd64`                   |
+| RAM              | Recommended: **24 GB+**              |
+| GPU (Optional)   | RTX 3090 / 4070 / 4090 / A100 / H100 |
+| Python           | **>= 3.10**                          |
 
-SSH ile bağlanmak istiyorsanız, aşağıdaki adımları takip edin.
+> 💡 A GPU is not required, but it significantly increases success rate.
 
 ---
 
-## 🔐 SSH ile Bağlanma
+## ⚙️ Renting a GPU Server (Quick Pod Example)
 
-> Bu adım sadece GPU üzerinde çalıştırıyorsanız gereklidir.
+1. Visit [Quick Pod](https://quickpod.io/) and sign up with your email.
+2. Verify your email address.
+3. Add credits to your account (credit card or crypto supported).
+4. Select **Ubuntu 22.04 (Jammy)** as the base template.
+5. In `Select GPU`, choose for example `RTX 4090`.
+6. Click **Create POD**.
+7. Once ready, access your machine via **Connect → Web Terminal**.
+
+If you want SSH access, continue with the next section.
+
+---
+
+## 🔐 Connecting via SSH
+
+> Required only if you're running on a GPU provider.
+
+Generate SSH keys:
 
 ```bash
 ssh-keygen
-# Enter tuşuna 3 kez basın
+# Press Enter three times
 ```
 
-Ardından public key’i görüntüleyin ve GPU sağlayıcınıza ekleyin:
+Display your public key and add it to your GPU provider:
 
 ```bash
 cat ~/.ssh/id_rsa.pub
 ```
 
-Daha sonra GPU instance’ınıza şu komutla bağlanın:
+Then connect:
 
 ```bash
-ssh -p 22 root@IP_ADRESINIZ
+ssh -p 22 root@YOUR_IP_ADDRESS
 ```
 
 ---
 
-## 🧩 Kurulum Adımları
+## 🧩 Installation Steps
 
 ```bash
-# Güncelleme ve sudo kurulumu
+# Update system and install sudo
 apt update && apt install -y sudo
 
-# Gerekli bağımlılıklar
+# Required dependencies
 sudo apt install -y python3 python3-venv python3-pip curl wget screen git lsof nano unzip iproute2 build-essential gcc g++ npm
 
-# CUDA kurulumu (GPU için)
+# Install CUDA (for GPU users)
 [ -f cuda.sh ] && rm cuda.sh; curl -o cuda.sh https://raw.githubusercontent.com/zunxbt/gensyn-testnet/main/cuda.sh && chmod +x cuda.sh && . ./cuda.sh
 
-# Screen oturumu oluştur
+# Create a screen session
 screen -S gensyn
 
-# Repo klonla ve dizine gir
+# Clone repository and navigate into it
 git clone https://github.com/gensyn-ai/rl-swarm.git && cd rl-swarm
 
-# Sanal ortam ve başlatma
+# Create virtual environment and start swarm
 python3 -m venv .venv
 . .venv/bin/activate
 ./run_rl_swarm.sh
 ```
 
-Kurulum sonrası sorulan sorulara:
+During startup, answer the prompts:
 
 ```
 Would you like to push models to Hugging Face Hub? [y/N]
 ```
 
-1. Cevabı: **N**
-2. Cevabı: **Y**
-3. Cevabı: **ENTER**
+1. Answer: **N**
+2. Answer: **Y**
+3. Answer: **ENTER**
+
 ---
 
-## 🌍 Web Arayüzüne Erişim (Port 3000)
+## 🌍 Accessing the Web UI (Port 3000)
 
 ```bash
 npm install -g localtunnel
 lt --port 3000
 ```
 
-Terminal size `https://something.loca.lt` gibi bir URL dönecektir. Bu bağlantıyı tarayıcıda açarak arayüze erişebilirsiniz.
+You will receive a URL such as `https://something.loca.lt`.
+Open it in your browser to access the dashboard.
 
 ---
 
-## 🔒 swarm.pem Yedekleme
+## 🔒 Backing Up `swarm.pem`
 
-`swarm.pem` dosyası **katkı kimliğinizi** temsil eder — kaybederseniz katkınız silinir.
+`swarm.pem` represents your **contributor identity**.
+If lost, **all your contribution history will disappear**.
 
-### Kolay Yedekleme
+### Easy Backup
 
 ```bash
 [ -f backup.sh ] && rm backup.sh; curl -sSL -O https://raw.githubusercontent.com/zunxbt/gensyn-testnet/main/backup.sh && chmod +x backup.sh && ./backup.sh
 ```
 
-### Manuel Yedekleme
+### Manual Backup
 
 ```bash
 scp -P 22 root@IP:/root/rl-swarm/swarm.pem ~/Desktop/swarm.pem
@@ -118,25 +123,28 @@ scp -P 22 root@IP:/root/rl-swarm/swarm.pem ~/Desktop/swarm.pem
 
 ---
 
-## 🔎 Node Durumu ve Kazanç Kontrolü
+## 🔎 Checking Node Status & Earnings
 
-### Logları Görüntüleme
+### View Logs
 
 ```bash
 screen -r gensyn
 ```
 
-Loglar çalışıyorsa, **Ctrl+A, D** ile ayrılabilirsiniz.
+Detach from screen with **Ctrl+A, D**.
 
-### Kazançları Kontrol Etme
+### Check Earnings
 
-Peer-ID’nizi kullanarak [Gensyn Node Tracker](https://gensyn-node.vercel.app/) adresinden kontrol edebilirsiniz.
+Visit:
+👉 **[https://gensyn-node.vercel.app/](https://gensyn-node.vercel.app/)**
+Enter your Peer-ID to view contributions.
 
-> Eğer `Connected EOA Address = 0x0000...` görüyorsanız node katkınız kaydedilmiyor olabilir. Yeni e-posta ve temiz `swarm.pem` ile yeniden başlatın.
+> If you see `Connected EOA Address = 0x0000...`, your node may not be tracked.
+> Create a new swarm with a fresh email and clean `swarm.pem`.
 
 ---
 
-## 🧰 Sorun Giderme
+## 🧰 Troubleshooting
 
 ### 🔴 `Daemon failed to start in 15.0 seconds`
 
@@ -144,25 +152,27 @@ Peer-ID’nizi kullanarak [Gensyn Node Tracker](https://gensyn-node.vercel.app/)
 nano $(python3 -c "import hivemind.p2p.p2p_daemon as m; print(m.__file__)")
 ```
 
-Açılan dosyada:
+Replace:
 
 ```
 startup_timeout: float = 15,
 ```
 
-Satırını şu şekilde değiştirin:
+With:
 
 ```
 startup_timeout: float = 120,
 ```
 
-Kaydedin (**Ctrl+X → Y → Enter**) ve swarm’u yeniden başlatın:
+Restart:
 
 ```bash
 python3 -m venv .venv && . .venv/bin/activate && ./run_rl_swarm.sh
 ```
 
-### 🔴 Bellek Sorunları (OOM)
+---
+
+### 🔴 Out of Memory (OOM Fix)
 
 ```bash
 sudo fallocate -l 16G /swapfile
@@ -173,16 +183,16 @@ sudo swapon /swapfile
 
 ---
 
-## 💡 İpuçları
+## 💡 Tips
 
-* Her zaman `screen` kullanın, terminal kapanınca süreç kesilmez.
-* `swarm.pem` dosyasını yedeklemeden node’u silmeyin.
-* Logları düzenli takip edin, Peer-ID’nizi not alın.
-* GPU kiralayabiliyorsanız çok daha yüksek başarı oranı elde edersiniz.
+* Always use `screen` to avoid interruptions.
+* Never delete your node without backing up `swarm.pem`.
+* Monitor your logs and save your Peer-ID.
+* GPU servers give a significantly higher completion rate.
 
 ---
 
-## 📁 Repo Dosya Önerileri
+## 📁 Recommended Repo Structure
 
 ```
 ├── README.md
@@ -193,18 +203,18 @@ sudo swapon /swapfile
 
 ---
 
-## ⚖️ Lisans
+## ⚖️ License
 
-MIT Lisansı altında paylaşılmıştır. Dilediğiniz gibi kopyalayabilir, geliştirebilir ve paylaşabilirsiniz.
+This guide is shared under the MIT License — feel free to copy, modify, and distribute.
 
 ---
 
-### ✍️ Hazırlayan
+### ✍️ Author
 
 **Huseyin — HusoNode**
 
-> Validator | AI & Infrastructure Builder | Web3 Contributor
+Validator | AI & Infrastructure Builder | Web3 Contributor
 
 📧 [contact@husonode.xyz](mailto:contact@husonode.xyz)
-🌐 [explorer.husonode.xyz](https://explorer.husonode.xyz)
-🐙 [github.com/aksamlan](https://github.com/aksamlan)
+🌐 [https://explorer.husonode.xyz](https://explorer.husonode.xyz)
+🐙 [https://github.com/aksamlan](https://github.com/aksamlan)
